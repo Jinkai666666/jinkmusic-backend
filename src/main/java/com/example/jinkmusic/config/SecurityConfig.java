@@ -1,30 +1,29 @@
 package com.example.jinkmusic.config;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import com.example.jinkmusic.config.JwtAuthFilter;
 
-@Configuration // 表示这是一个配置类
+@Configuration
 public class SecurityConfig {
 
-    @Bean // 定义一个 SecurityFilterChain Bean 交给 Spring 管理
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    @Bean
+    public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
-                // 关闭 CSRF 防护（适用于前后端分离或 Postman 测试）
                 .csrf(csrf -> csrf.disable())
-
-                // 配置请求授权规则
                 .authorizeHttpRequests(auth -> auth
-                        // 放行注册接口，无需登录即可访问
-                        .requestMatchers("/api/user/register").permitAll()
+                        .requestMatchers("/api/user/login", "/api/user/register").permitAll()
+                        .anyRequest().authenticated()
+                )
+                // 关闭 Spring Security 自带的登录表单页面
+                .formLogin(form -> form.disable());
 
-                        // 其余所有请求都需要身份验证
-                        //.anyRequest().authenticated()
-                        .anyRequest().permitAll() //  临时放行所有接口
-                );
+        http.addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
-        // 构建并返回过滤器链对象（Spring Security 的核心）
         return http.build();
     }
 }
