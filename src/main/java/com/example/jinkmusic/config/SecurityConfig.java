@@ -17,7 +17,16 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/user/register", "/api/user/login", "/api/song/list","api/song/","/api/song/import").permitAll()
+                        .requestMatchers("/api/user/register"
+                                , "/api/user/login"
+                                , "/api/song/list"
+                                ,"api/song/"
+                                ,"/api/song/import"
+                                ,"/playlist/import"
+                                ,"/playlist/import",
+                                "/playlist/list",
+                                "/playlist/*/songs"
+                        ).permitAll()
                         .anyRequest().authenticated()
                 )
 

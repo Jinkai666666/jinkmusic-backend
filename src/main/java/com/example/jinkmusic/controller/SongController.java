@@ -1,12 +1,13 @@
 package com.example.jinkmusic.controller;
 
-import com.example.jinkmusic.model.AddSongRequest;
+import com.example.jinkmusic.model.Playlist;
 import com.example.jinkmusic.model.Song;
 import com.example.jinkmusic.model.ImportPlaylistRequest;
+import com.example.jinkmusic.repository.PlaylistRepository;
 import com.example.jinkmusic.repository.SongRepository;
 import com.example.jinkmusic.util.Result;
 
-import com.fasterxml.jackson.core.type.TypeReference; // Jackson 泛型解析所需
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,55 +21,45 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/song")
+@RequestMapping("/song")
 public class SongController {
 
     @Autowired
     private SongRepository songRepository;
 
+    @Autowired
+    private PlaylistRepository playlistRepository;
+
     /**
      * 获取所有歌曲列表接口
-     * 请求方式：GET
-     * 路径：/api/song/list
      */
     @GetMapping("/list")
     public Result<List<Song>> listAllSongs() {
-        List<Song> songs = songRepository.findAll(); // 查询所有歌曲
+        List<Song> songs = songRepository.findAll();
         return Result.success("获取成功", songs);
     }
 
     /**
-     * 添加单首歌曲接口
-     * 请求方式：POST
-     * 路径：/api/song/add
-     * 请求体：AddSongRequest（包含歌曲信息）
-     */
-    @PostMapping("/add")
-    public Result<String> addSong(@RequestBody AddSongRequest request) {
-        // 创建新歌曲对象
-        Song song = new Song();
-        song.setName(request.getName());
-        song.setArtist(request.getArtist());
-        song.setCoverUrl(request.getCoverUrl());
-        song.setPlayUrl(request.getPlayUrl());
-        song.setIsVip(request.getIsVip() != null ? request.getIsVip() : false);
-        song.setUpdateTime(LocalDateTime.now());
-
-        // 保存到数据库
-        songRepository.save(song);
-        return Result.success("添加成功", null);
-    }
-
-    /**
-     * 从第三方平台（如网易云、QQ音乐）导入歌单接口
-     * 请求方式：POST
-     * 路径：/api/song/import
-     * 请求体：ImportPlaylistRequest（包含平台和歌单ID）
+     * 从第三方平台导入歌单
      */
     @PostMapping("/import")
     public Result<String> importPlaylist(@RequestBody ImportPlaylistRequest request) {
-        String platform = request.getPlatform();     // 平台标识（netease / tencent / kugou）
+        String platform = request.getPlatform();     // 平台类型
         String playlistId = request.getPlaylistId(); // 歌单 ID
+
+        // 先查/创建 Playlist
+        Playlist playlist = playlistRepository
+                .findByPlatformAndSourcePlaylistId(platform, playlistId)
+                .orElseGet(() -> {
+                    Playlist p = new Playlist();
+                    p.setPlatform(platform);
+                    p.setSourcePlaylistId(playlistId);
+                    p.setName(request.getPlaylistName() != null
+                            ? request.getPlaylistName()
+                            : "导入歌单-" + playlistId);
+                    p.setCreateTime(LocalDateTime.now());
+                    return playlistRepository.save(p);
+                });
 
         String apiUrl = "https://meting-api.jinkai.workers.dev/api"
                 + "?server=" + platform
@@ -81,7 +72,6 @@ public class SongController {
             ResponseEntity<String> response = restTemplate.getForEntity(apiUrl, String.class);
             String body = response.getBody();
 
-            // 将返回的 JSON 转换为 List<Map>
             ObjectMapper mapper = new ObjectMapper();
             songList = mapper.readValue(body, new TypeReference<List<Map<String, Object>>>() {});
         } catch (Exception e) {
@@ -102,19 +92,18 @@ public class SongController {
                         .collect(Collectors.joining("/"));
 
                 String coverUrl = (String) songInfo.get("pic");
-                String sourceId = songInfo.get("id").toString();
+                String songId = songInfo.get("id").toString();
 
-                // 如果数据库已存在这首歌（名称+歌手），则跳过
-                if (songRepository.existsByNameAndArtist(name, artist)) {
+                // 如果已存在（同平台+同歌曲ID），跳过
+                if (songRepository.existsByTypeAndSong(platform, songId)) {
                     continue;
                 }
 
-                // 调用 UnblockNeteaseMusic 本地服务获取播放链接
-                String unblockApi = "http://localhost:3000/song/url?id=" + sourceId;
+                // 获取播放链接
+                String unblockApi = "http://localhost:3000/song/url?id=" + songId;
                 RestTemplate rest = new RestTemplate();
                 Map<String, Object> playResult = rest.getForObject(unblockApi, Map.class);
 
-                // 解析播放链接
                 List<Map<String, Object>> data = (List<Map<String, Object>>) playResult.get("data");
                 if (data == null || data.isEmpty()) {
                     failCount++;
@@ -129,10 +118,14 @@ public class SongController {
 
                 // 保存入库
                 Song song = new Song();
+                song.setType(platform);
                 song.setName(name);
                 song.setArtist(artist);
-                song.setCoverUrl(coverUrl);
-                song.setPlayUrl(playUrl);
+                song.setUrl(playUrl);
+                song.setPic(coverUrl);
+                song.setLrc(null); // 暂无歌词数据
+                song.setSong(songId);
+                song.setPlaylist(playlist); // 绑定 Playlist 外键
                 song.setIsVip(true);
                 song.setUpdateTime(LocalDateTime.now());
 
@@ -140,11 +133,9 @@ public class SongController {
                 successCount++;
             } catch (Exception e) {
                 failCount++;
-                continue;
             }
         }
 
         return Result.success("导入完成，成功导入 " + successCount + " 首，失败 " + failCount + " 首", null);
     }
-
 }

@@ -3,6 +3,8 @@ package com.example.jinkmusic.model;
 public class ImportPlaylistRequest {
     private String platform;    // 平台，如 netease / tencent / xiami / kugou / kuwo / baidu
     private String playlistId;  // 歌单 ID
+    private String playlistName;
+
 
     public String getPlatform() {
         return platform;
@@ -16,5 +18,12 @@ public class ImportPlaylistRequest {
     }
     public void setPlaylistId(String playlistId) {
         this.playlistId = playlistId;
+    }
+    public String getPlaylistName() {
+        return playlistName;
+    }
+
+    public void setPlaylistName(String playlistName) {
+        this.playlistName = playlistName;
     }
 }

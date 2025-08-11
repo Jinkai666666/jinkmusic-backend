@@ -11,69 +11,70 @@ public class Song {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    // 歌名
+    // 平台类型（netease / qq / kuwo / migu）
+    private String type;
+
+    // 歌曲名
     private String name;
 
     // 歌手
     private String artist;
 
+    // 播放链接
+    private String url;
+
     // 封面链接
-    private String coverUrl;
+    private String pic;
 
-    // 播放链接（从网易/QQ平台获取的 MP3 链接）
-    private String playUrl;
+    // 歌词
+    @Column(columnDefinition = "TEXT")
+    private String lrc;
 
-    // 是否 VIP 歌曲（true 代表原链接为 VIP 歌曲）
+    // 单曲 ID（API 返回的 song 字段）
+    private String song;
+
+    // 所属歌单 ID（API 返回的 playlist 字段）
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "playlist_id")// 外键列名
+    private Playlist playlist;
+
+    // 是否 VIP 歌曲
     private Boolean isVip;
 
-    // 播放链接最后更新时间（用于定时刷新）
+    // 数据更新时间
     private LocalDateTime updateTime;
 
-    // Getter & Setter ↓↓↓
+    // Getter & Setter
+    public Long getId() { return id; }
 
-    public Long getId() {
-        return id;
-    }
+    public String getType() { return type; }
+    public void setType(String type) { this.type = type; }
 
-    public String getName() {
-        return name;
-    }
-    public void setName(String name) {
-        this.name = name;
-    }
+    public String getName() { return name; }
+    public void setName(String name) { this.name = name; }
 
-    public String getArtist() {
-        return artist;
-    }
-    public void setArtist(String artist) {
-        this.artist = artist;
-    }
+    public String getArtist() { return artist; }
+    public void setArtist(String artist) { this.artist = artist; }
 
-    public String getCoverUrl() {
-        return coverUrl;
-    }
-    public void setCoverUrl(String coverUrl) {
-        this.coverUrl = coverUrl;
-    }
+    public String getUrl() { return url; }
+    public void setUrl(String url) { this.url = url; }
 
-    public String getPlayUrl() {
-        return playUrl;
-    }
-    public void setPlayUrl(String playUrl) {
-        this.playUrl = playUrl;
-    }
+    public String getPic() { return pic; }
+    public void setPic(String pic) { this.pic = pic; }
 
-    public Boolean getIsVip() {
-        return isVip;
-    }
-    public void setIsVip(Boolean isVip) {
-        this.isVip = isVip;
-    }
+    public String getLrc() { return lrc; }
+    public void setLrc(String lrc) { this.lrc = lrc; }
 
-    public LocalDateTime getUpdateTime() {
-        return updateTime;
-    }
-    public void setUpdateTime(LocalDateTime updateTime) {
-        this.updateTime = updateTime;
-    }
+    public String getSong() { return song; }
+    public void setSong(String song) { this.song = song; }
+
+    public Playlist getPlaylist() { return playlist; }
+    public void setPlaylist(Playlist playlist) { this.playlist = playlist; }
+
+
+    public Boolean getIsVip() { return isVip; }
+    public void setIsVip(Boolean isVip) { this.isVip = isVip; }
+
+    public LocalDateTime getUpdateTime() { return updateTime; }
+    public void setUpdateTime(LocalDateTime updateTime) { this.updateTime = updateTime; }
 }
