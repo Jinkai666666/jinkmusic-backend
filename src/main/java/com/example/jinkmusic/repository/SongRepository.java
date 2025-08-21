@@ -1,7 +1,6 @@
 package com.example.jinkmusic.repository;
 
-import com.example.jinkmusic.model.Song;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.example.jinkmusic.model.entity.Song;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 

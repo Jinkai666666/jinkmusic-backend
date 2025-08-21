@@ -1,4 +1,4 @@
-package com.example.jinkmusic.model;
+package com.example.jinkmusic.model.dto;
 
 public class ImportPlaylistRequest {
     private String platform;    // 平台，如 netease / tencent / xiami / kugou / kuwo / baidu

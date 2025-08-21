@@ -1,6 +1,6 @@
 package com.example.jinkmusic.repository;
 
-import com.example.jinkmusic.model.Playlist;
+import com.example.jinkmusic.model.entity.Playlist;
 import org.springframework.data.jpa.repository.JpaRepository;
 import java.util.Optional;
 

@@ -1,18 +1,16 @@
 package com.example.jinkmusic.controller;
 
-import com.example.jinkmusic.model.User;
-import com.example.jinkmusic.model.UserVO;
+import com.example.jinkmusic.model.entity.User;
+import com.example.jinkmusic.model.vo.UserVO;
 import com.example.jinkmusic.repository.UserRepository;
 import com.example.jinkmusic.util.Result;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
-import com.example.jinkmusic.model.LoginRequest;
+import com.example.jinkmusic.model.dto.LoginRequest;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.example.jinkmusic.util.JwtUtil;
-import org.springframework.security.core.context.SecurityContextHolder;
-import com.example.jinkmusic.model.UserVO ;
+
 import java.util.HashMap;
 import java.util.Map;
 

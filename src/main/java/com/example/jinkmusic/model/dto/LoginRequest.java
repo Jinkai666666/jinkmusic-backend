@@ -1,4 +1,4 @@
-package com.example.jinkmusic.model;
+package com.example.jinkmusic.model.dto;
 
 
 //login 接口

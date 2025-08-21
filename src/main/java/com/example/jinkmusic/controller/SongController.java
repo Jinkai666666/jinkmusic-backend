@@ -1,10 +1,11 @@
 package com.example.jinkmusic.controller;
 
-import com.example.jinkmusic.model.Playlist;
-import com.example.jinkmusic.model.Song;
-import com.example.jinkmusic.model.ImportPlaylistRequest;
+import com.example.jinkmusic.model.entity.Playlist;
+import com.example.jinkmusic.model.entity.Song;
+import com.example.jinkmusic.model.dto.ImportPlaylistRequest;
 import com.example.jinkmusic.repository.PlaylistRepository;
 import com.example.jinkmusic.repository.SongRepository;
+import com.example.jinkmusic.service.SongService;
 import com.example.jinkmusic.util.Result;
 
 import com.fasterxml.jackson.core.type.TypeReference;
@@ -14,6 +15,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -138,4 +140,20 @@ public class SongController {
 
         return Result.success("导入完成，成功导入 " + successCount + " 首，失败 " + failCount + " 首", null);
     }
+
+
+
+    @Autowired
+    private SongService songService;
+    /**
+     * 获取播放链接
+     * 访问示例: /song/url?platform=netease&songId=12345
+     */
+    @GetMapping("/url")
+    public String getSongUrl(@RequestParam String platform,
+                             @RequestParam String songId) {
+        return songService.getSongUrl(platform, songId);
+    }
+
+
 }

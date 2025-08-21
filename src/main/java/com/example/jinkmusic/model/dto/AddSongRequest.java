@@ -1,4 +1,4 @@
-package com.example.jinkmusic.model;
+package com.example.jinkmusic.model.dto;
 
 /**
  * 添加歌曲时的请求体结构，用于接收前端传来的 JSON 参数

@@ -1,4 +1,4 @@
-package com.example.jinkmusic.model;
+package com.example.jinkmusic.model.entity;
 
 import jakarta.persistence.*;
 import java.time.LocalDateTime;

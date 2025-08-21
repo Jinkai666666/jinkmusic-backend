@@ -25,7 +25,9 @@ public class SecurityConfig {
                                 ,"/playlist/import"
                                 ,"/playlist/import",
                                 "/playlist/list",
-                                "/playlist/*/songs"
+                                "/playlist/*/songs",
+                                "/song/url",
+                                "/playlist/netease"
                         ).permitAll()
                         .anyRequest().authenticated()
                 )

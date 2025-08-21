@@ -1,12 +1,15 @@
 package com.example.jinkmusic.service.impl;
 
-import com.example.jinkmusic.model.ImportPlaylistRequest;
-import com.example.jinkmusic.model.Playlist;
-import com.example.jinkmusic.model.Song;
+import com.example.jinkmusic.model.dto.ImportPlaylistRequest;
+import com.example.jinkmusic.model.entity.Playlist;
+import com.example.jinkmusic.model.entity.Song;
 import com.example.jinkmusic.repository.PlaylistRepository;
 import com.example.jinkmusic.repository.SongRepository;
 import com.example.jinkmusic.service.PlaylistService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.http.ResponseEntity;
@@ -104,4 +107,28 @@ public class PlaylistServiceImpl implements PlaylistService {
 
         return songList;
     }
+
+
+    @Override
+    public String getNeteasePlaylists(String uid) {
+        // 网易云获取用户歌单接口
+        String url = "https://music.163.com/api/user/playlist?uid=" + uid + "&limit=100";
+
+        // 1. 创建 RestTemplate
+        RestTemplate restTemplate = new RestTemplate();
+
+        // 2. 设置请求头，网易云需要 User-Agent 才会返回数据
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("User-Agent", "Mozilla/5.0");
+
+        // 3. 把请求头封装到 HttpEntity
+        HttpEntity<String> entity = new HttpEntity<>(headers);
+
+        // 4. 使用 exchange 方法发起 GET 请求
+        ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.GET, entity, String.class);
+
+        // 5. 返回 JSON 字符串
+        return response.getBody();
+    }
+
 }

@@ -1,8 +1,8 @@
 package com.example.jinkmusic.controller;
 
-import com.example.jinkmusic.model.Playlist;
-import com.example.jinkmusic.model.Song;
-import com.example.jinkmusic.model.ImportPlaylistRequest;
+import com.example.jinkmusic.model.entity.Playlist;
+import com.example.jinkmusic.model.entity.Song;
+import com.example.jinkmusic.model.dto.ImportPlaylistRequest;
 import com.example.jinkmusic.repository.PlaylistRepository;
 import com.example.jinkmusic.repository.SongRepository;
 import com.example.jinkmusic.service.PlaylistService;
@@ -22,6 +22,7 @@ public class PlaylistController {
 
     @Autowired
     private SongRepository songRepository;
+
 
     /**
      * 导入歌单
@@ -46,4 +47,15 @@ public class PlaylistController {
     public List<Song> listSongsByPlaylist(@PathVariable Long id) {
         return songRepository.findByPlaylist_Id(id);
     }
+
+
+
+    // 根据网易云用户ID获取歌单列表
+    @GetMapping("/playlist/netease")
+    public String getNeteasePlaylists(@RequestParam String uid){
+
+
+        return playlistService.getNeteasePlaylists(uid) ;
+    }
+
 }
