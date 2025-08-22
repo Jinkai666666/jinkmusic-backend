@@ -38,6 +38,7 @@ public class SongServiceImpl implements SongService {
 
             // data 是数组，取第一个元素里的 url
             JsonNode dataArray = root.path("data");
+
             if (dataArray.isArray() && dataArray.size() > 0) {
                 return dataArray.get(0).path("url").asText();
             }

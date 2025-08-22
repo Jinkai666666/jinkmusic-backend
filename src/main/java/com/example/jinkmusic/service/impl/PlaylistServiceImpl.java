@@ -7,12 +7,11 @@ import com.example.jinkmusic.repository.PlaylistRepository;
 import com.example.jinkmusic.repository.SongRepository;
 import com.example.jinkmusic.service.PlaylistService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
+import org.springframework.http.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
-import org.springframework.http.ResponseEntity;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -29,6 +28,8 @@ public class PlaylistServiceImpl implements PlaylistService {
 
     @Autowired
     private PlaylistRepository playlistRepository;
+    @Autowired
+    private RestTemplate restTemplate;
 
     @Override
     public List<Song> importPlaylist(ImportPlaylistRequest request) {
@@ -130,5 +131,54 @@ public class PlaylistServiceImpl implements PlaylistService {
         // 5. 返回 JSON 字符串
         return response.getBody();
     }
+
+    @Override
+    public List<Song> getSongsFromPlaylist(String playlistId, String platform) {
+        // 拼接接口地址
+        String apiUrl = "http://43.139.59.233:4001/163api/playlist/detail";
+
+
+        try {
+            // 发请求，拿到 JSON 字符串
+            // 构造 POST 参数
+            MultiValueMap<String, String> params = new LinkedMultiValueMap<>();
+            params.add("id", playlistId);
+
+            // 设置请求头，Content-Type 要是表单
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
+
+                // 封装请求体
+            HttpEntity<MultiValueMap<String, String>> requestEntity = new HttpEntity<>(params, headers);
+
+            // 发 POST 请求
+            ResponseEntity<String> response = restTemplate.postForEntity(apiUrl, requestEntity, String.class);
+
+            String body = response.getBody();
+
+            // 解析 JSON
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode root = mapper.readTree(body);
+
+            // 提取歌曲数组
+            JsonNode songArray = root.path("playlist").path("tracks");
+            // 遍历数组，封装成 Song 对象
+            List<Song> songs = new ArrayList<>();
+            if (songArray.isArray()) {
+                for (JsonNode songNode : songArray) {
+                    Song song = new Song();
+                    song.setSong(songNode.path("id").asText()); // 存 ID
+                    song.setName(songNode.path("name").asText());//存歌名
+                    song.setArtist(songNode.path("ar").get(0).path("name").asText()); //存歌手
+                    songs.add(song);
+                }
+            }
+            return songs;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
+    }
+
 
 }
